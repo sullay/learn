@@ -1,0 +1,56 @@
+写在前面的话:  
+    当两个人碰面后,产生了好感,如果需要得到双方的信息,那么双方的交流是必不可少的!应用程序也如此,  
+    各个应用程序之间的交流就需要WebService来作为相互交流的桥梁!  
+  
+项目目的:  
+    程序A调用程序B中的方法C...  
+  
+  
+首先申明:本次需要采用的JDK版本为jdk1.6+,也就是要java6+才能看到效果,java5没试过...我认为,升级一下JDK版本比起安装什么  
+Axis以及导入一堆jar包和配置N多配置文件来说,java6的webservice无疑是简单的不能再简单!  
+  
+废话少说少整点,开整:  
+1,建立一个项目名为Trans,web项目,普通java项目都可以!这里我们就以简单的java应用程序来作为示范吧!  
+    1.1在建立一个方法属于com.shu.function.Function类:  
+  
+//别忘了引入webservice  
+@WebService  
+public class Function{  
+  
+    //该方法就是要暴露给其他应用程序调用的方法  
+    public String transWords(String words){  
+        String res="";  
+        for(char ch : words.toCharArray()){  
+            res+="\t"+ch+"\t";  
+        }  
+        return res;  
+    }  
+  
+    //这里我们使用main方法来发布我们的service  
+    public void static main(String[] args){  
+        Endpoint.publish("http://localhost:9001/Service/Function",new Function());  
+        System.out.println("Publish Success~");  
+    }  
+}  
+  
+2.在打出"Publish Success~"后,说明我们消息发布成功,不成的话,注意：1.需要JDK1.6+,2.确定服务器端口没有被占用;成功后,  
+在浏览器地址栏输入:http://localhost:9001/Service/Function?wsdl就可以看到该service的详细信息!  
+  
+3.建立另外一个项目:GiveMeWords  
+  
+关键的来了,打开cmd输入以下命令:wsimport -s src的路径 -p 完整包名 -keep webservice的发布地址 然后回车就OK了,  
+比如说: wsimport -s F:\\WorkBench\\Eclipse\\GiveMeWords\\src  -p com.shu.service -keep http://localhost:9001/Service/Function?wsdl  
+(如果wsimport命令失效,请检查是否把jdk配入环境变量!JAVA_HOME:JDK所在位置,CLASSPATH:%JAVA_HOME%\lib\tools.jar)  
+回车后,会出现:  
+    parsing WSDL...  
+    generating code...  
+    compiling code...  
+恭喜你,成功了,你可以刷新一下你的GiveMeWords项目后会在com.shu.service包下会有对应的WebService生成的文件!  
+然后调用如下:  
+public void static main(String[] args){  
+    Function fu =new FunctionService().getFunctionPort();  
+    String str=fu.transWords("Let's Get Heck Out Of Here!");  
+    //最后str就是在Trans项目下的transWords方法处理后的字符串咯!  
+}  
+  
+最后...怎么样,webservice不难吧,全靠jdk的升级呀!  
